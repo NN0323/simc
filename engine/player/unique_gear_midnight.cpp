@@ -2128,6 +2128,27 @@ void locuswalkers_ribbon( special_effect_t& e )
   new locuswalkers_ribbon_t( e );
 }
 
+// Gloom-Spattered Dreadscale
+// 1260633 Driver (Effect 1 Radius 8 yards, School Shadow)
+// 1260627 Damage (Effect 1 Scaled value)
+// 1263141 Absorb buff (Effect 1 Absorb Damage, Effect 2 Scaled value)
+// 1263332 ???
+void gloom_spattered_dreadscale( special_effect_t& e )
+{
+  auto scaled_value = e.player->find_spell( 1260627 );
+  assert( scaled_value && "missing scaled value spell 1260627" );
+
+  auto damage         = create_proc_action<generic_aoe_proc_t>( "Gloom-Spattered_Dreadscale", e, 1260633, true );
+  damage->base_dd_min = damage->base_dd_max = scaled_value->effectN( 1 ).average( e );
+
+  auto absorb_value = e.player->find_spell( 1263141 );
+  assert( absorb_value && "missing absorb value spell 1263141" );
+  auto absorb_buff = create_buff<absorb_buff_t>( e.player, "Gloom-Spattered_Dreadscale", absorb_value->effectN( 1 ).trigger() );
+
+  e.custom_buff = absorb_buff;
+  e.execute_action = damage;
+}
+
 }  // namespace trinkets
 
 namespace weapons
@@ -2440,6 +2461,7 @@ void register_special_effects()
   register_special_effect( 1259293, DISABLED_EFFECT ); // Vaelgor's Final Stare equip driver
   register_special_effect( 1260459, trinkets::nullsight );
   register_special_effect( 1259314, trinkets::locuswalkers_ribbon);
+  register_special_effect( 1260633, trinkets::gloom_spattered_dreadscale);
   // Weapons
   register_special_effect( { 1253357, 1253359 }, weapons::torments_duality );  // umbral sabre & radiant foil
   // Armor
