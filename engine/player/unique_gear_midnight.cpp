@@ -2142,33 +2142,34 @@ void gloom_spattered_dreadscale( special_effect_t& e )
     buff_t* absorb_buff;
 
     gloom_spattered_dreadscale_t( const special_effect_t& effect )
-      : absorb_t( "gloom_spattered_dreadscale", effect.player, effect.driver() ),
+      : absorb_t( "gloom_spattered_dreadscale_absorb", effect.player, effect.driver() ),
         damage( nullptr ),
         absorb_buff( nullptr )
     {
-      base_dd_min = base_dd_max = effect.driver()->effectN( 1 ).average( effect );
+      const spell_data_t* equip = effect.player->find_spell( 1260627 );
+      base_dd_min = base_dd_max = equip->effectN( 1 ).average( effect.item );
       
       damage = create_proc_action<generic_aoe_proc_t>( "gloom_spattered_dreadscale_damage", effect, 1260633, true );
-      damage->base_dd_min = damage->base_dd_max = effect.driver()->effectN( 1 ).average( effect );
+      damage->base_dd_min = damage->base_dd_max = equip->effectN( 1 ).average( effect.item );
     }
 
-    absorb_buff_t* create_buff( const action_state_t* s ) override
-    {
-      auto b = absorb_t::create_buff( s );
-      absorb_buff = b;
-      return b;
-    }
+    // absorb_buff_t* create_buff( const action_state_t* s ) override
+    // {
+    //   auto b = absorb_t::create_buff( s );
+    //   absorb_buff = b;
+    //   return b;
+    // }
 
     void execute() override
     {
       target = player;
-      action_t::execute();
       damage->execute();
+      action_t::execute();
     }
   };
 
   e.execute_action = create_proc_action<gloom_spattered_dreadscale_t>( "gloom_spattered_dreadscale", e );
-  
+
   new gloom_spattered_dreadscale_t( e );
 }
 
