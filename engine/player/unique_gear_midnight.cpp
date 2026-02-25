@@ -2135,18 +2135,41 @@ void locuswalkers_ribbon( special_effect_t& e )
 // 1263332 ???
 void gloom_spattered_dreadscale( special_effect_t& e )
 {
-  auto scaled_value = e.player->find_spell( 1260627 );
-  assert( scaled_value && "missing scaled value spell 1260627" );
+  
+  struct gloom_spattered_dreadscale_t : public absorb_t
+  {
+    action_t* damage;
+    buff_t* absorb_buff;
 
-  auto damage         = create_proc_action<generic_aoe_proc_t>( "Gloom-Spattered_Dreadscale", e, 1260633, true );
-  damage->base_dd_min = damage->base_dd_max = scaled_value->effectN( 1 ).average( e );
+    gloom_spattered_dreadscale_t( const special_effect_t& effect )
+      : absorb_t( "gloom_spattered_dreadscale", effect.player, effect.driver() ),
+        damage( nullptr ),
+        absorb_buff( nullptr )
+    {
+      base_dd_min = base_dd_max = effect.driver()->effectN( 1 ).average( effect );
+      
+      damage = create_proc_action<generic_aoe_proc_t>( "gloom_spattered_dreadscale_damage", effect, 1260633, true );
+      damage->base_dd_min = damage->base_dd_max = effect.driver()->effectN( 1 ).average( effect );
+    }
 
-  auto absorb_value = e.player->find_spell( 1263141 );
-  assert( absorb_value && "missing absorb value spell 1263141" );
-  auto absorb_buff = create_buff<absorb_buff_t>( e.player, "Gloom-Spattered_Dreadscale", absorb_value->effectN( 1 ).trigger() );
+    absorb_buff_t* create_buff( const action_state_t* s ) override
+    {
+      auto b = absorb_t::create_buff( s );
+      absorb_buff = b;
+      return b;
+    }
 
-  e.custom_buff = absorb_buff;
-  e.execute_action = damage;
+    void execute() override
+    {
+      target = player;
+      action_t::execute();
+      damage->execute();
+    }
+  };
+
+  e.execute_action = create_proc_action<gloom_spattered_dreadscale_t>( "gloom_spattered_dreadscale", e );
+  
+  new gloom_spattered_dreadscale_t( e );
 }
 
 }  // namespace trinkets
