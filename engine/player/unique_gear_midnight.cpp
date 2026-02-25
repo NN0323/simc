@@ -2153,13 +2153,6 @@ void gloom_spattered_dreadscale( special_effect_t& e )
       damage->base_dd_min = damage->base_dd_max = equip->effectN( 1 ).average( effect.item );
     }
 
-    // absorb_buff_t* create_buff( const action_state_t* s ) override
-    // {
-    //   auto b = absorb_t::create_buff( s );
-    //   absorb_buff = b;
-    //   return b;
-    // }
-
     void execute() override
     {
       target = player;
@@ -2169,8 +2162,6 @@ void gloom_spattered_dreadscale( special_effect_t& e )
   };
 
   e.execute_action = create_proc_action<gloom_spattered_dreadscale_t>( "gloom_spattered_dreadscale", e );
-
-  new gloom_spattered_dreadscale_t( e );
 }
 
 }  // namespace trinkets
